@@ -1,15 +1,78 @@
-// const fs = require('fs/promises')
-// const contacts = require('./contacts.json')
+const fs = require('fs/promises');
+const path = require('path');
+const contacts = require('./contacts.json');
+const { v4: uuidv4 } = require('uuid');
 
-const listContacts = async () => {}
+const contactsPath = path.join(__dirname, '/contacts.json');
 
-const getContactById = async (contactId) => {}
+const listContacts = async () => {
+  return contacts;
+};
 
-const removeContact = async (contactId) => {}
+const getContactById = async contactId => {
+  try {
+    const contact = await contacts.find(({ id }) => String(id) === contactId);
+    return contact;
+  } catch (e) {
+    console.log(e);
+  }
+};
 
-const addContact = async (body) => {}
+const removeContact = async contactId => {
+  try {
+    const contact = await contacts.find(({ id }) => String(id) === contactId);
+    if (contact) {
+      await fs.writeFile(
+        contactsPath,
+        JSON.stringify(contacts.filter(({ id }) => String(id) !== contactId)),
+      );
+      return contact;
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
 
-const updateContact = async (contactId, body) => {}
+const addContact = async body => {
+  try {
+    const contact = {
+      id: uuidv4(),
+      ...body,
+    };
+
+    const newContacts = [...contacts, contact];
+    await fs.writeFile(contactsPath, JSON.stringify(newContacts));
+    console.log('We add new contact');
+    return contact;
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const updateContact = async (contactId, body) => {
+  try {
+    const contact = await contacts.find(({ id }) => String(id) === contactId);
+    if (contact) {
+      const newContact = {
+        ...contact,
+        ...body,
+      };
+      await fs.writeFile(
+        contactsPath,
+        JSON.stringify(
+          contacts.map(contact => {
+            if (String(contact.id) === contactId) {
+              return newContact;
+            } else return contact;
+          }),
+        ),
+      );
+      return newContact;
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
 
 module.exports = {
   listContacts,
@@ -17,4 +80,4 @@ module.exports = {
   removeContact,
   addContact,
   updateContact,
-}
+};
