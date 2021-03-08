@@ -1,18 +1,14 @@
-const fs = require('fs/promises');
-const path = require('path');
-const contacts = require('./contacts.json');
-const { v4: uuidv4 } = require('uuid');
-
-const contactsPath = path.join(__dirname, '/contacts.json');
+const Contact = require('./schemas/contact');
 
 const listContacts = async () => {
-  return contacts;
+  const result = await Contact.find({});
+  return result;
 };
 
 const getContactById = async contactId => {
   try {
-    const contact = await contacts.find(({ id }) => String(id) === contactId);
-    return contact;
+    const result = await Contact.findOne({ _id: contactId });
+    return result;
   } catch (e) {
     console.log(e);
   }
@@ -20,14 +16,8 @@ const getContactById = async contactId => {
 
 const removeContact = async contactId => {
   try {
-    const contact = await contacts.find(({ id }) => String(id) === contactId);
-    if (contact) {
-      await fs.writeFile(
-        contactsPath,
-        JSON.stringify(contacts.filter(({ id }) => String(id) !== contactId)),
-      );
-      return contact;
-    }
+    const result = await Contact.findByIdAndRemove({ _id: contactId });
+    return result;
   } catch (err) {
     console.log(err);
   }
@@ -35,15 +25,9 @@ const removeContact = async contactId => {
 
 const addContact = async body => {
   try {
-    const contact = {
-      id: uuidv4(),
-      ...body,
-    };
-
-    const newContacts = [...contacts, contact];
-    await fs.writeFile(contactsPath, JSON.stringify(newContacts));
-    console.log('We add new contact');
-    return contact;
+    const result = await Contact.create(body);
+    console.log(result);
+    return result;
   } catch (err) {
     console.log(err);
   }
@@ -51,24 +35,12 @@ const addContact = async body => {
 
 const updateContact = async (contactId, body) => {
   try {
-    const contact = await contacts.find(({ id }) => String(id) === contactId);
-    if (contact) {
-      const newContact = {
-        ...contact,
-        ...body,
-      };
-      await fs.writeFile(
-        contactsPath,
-        JSON.stringify(
-          contacts.map(contact => {
-            if (String(contact.id) === contactId) {
-              return newContact;
-            } else return contact;
-          }),
-        ),
-      );
-      return newContact;
-    }
+    const result = await Contact.findByIdAndUpdate(
+      { _id: contactId },
+      { ...body },
+      { new: true },
+    );
+    return result;
   } catch (err) {
     console.log(err);
   }
