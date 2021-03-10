@@ -4,11 +4,12 @@ const {
   removeContact,
   addContact,
   updateContact,
-} = require('../model/index');
+} = require('../model/contacts');
 
-const get = async (_req, res, next) => {
+const get = async (req, res, next) => {
   try {
-    const contacts = await listContacts();
+    const userId = req.user.id;
+    const contacts = await listContacts(userId);
     return res.json({
       status: 'success',
       code: 200,
@@ -23,7 +24,8 @@ const get = async (_req, res, next) => {
 
 const getById = async (req, res, next) => {
   try {
-    const contact = await getContactById(req.params.contactId);
+    const userId = req.user.id;
+    const contact = await getContactById(req.params.contactId, userId);
     if (contact) {
       return res.json({
         status: 'success',
@@ -46,7 +48,8 @@ const getById = async (req, res, next) => {
 
 const create = async (req, res, next) => {
   try {
-    const contact = await addContact(req.body);
+    const userId = req.user.id;
+    const contact = await addContact({ ...req.body, owner: userId });
     console.log('New contact', contact);
     if (contact) {
       return res.status(201).json({
@@ -71,7 +74,8 @@ const create = async (req, res, next) => {
 
 const remove = async (req, res, next) => {
   try {
-    const contact = await removeContact(req.params.contactId);
+    const userId = req.user.id;
+    const contact = await removeContact(req.params.contactId, userId);
     if (contact) {
       return res.json({
         status: 'success',
@@ -92,6 +96,7 @@ const remove = async (req, res, next) => {
 
 const update = async (req, res, next) => {
   try {
+    const userId = req.user.id;
     if (Object.keys(req.body).length < 1) {
       return res.status(400).json({
         status: 'error',
@@ -99,7 +104,7 @@ const update = async (req, res, next) => {
         message: 'missing fields',
       });
     }
-    const contact = await updateContact(req.params.contactId, req.body);
+    const contact = await updateContact(req.params.contactId, req.body, userId);
     console.log(contact);
     if (contact) {
       return res.json({
