@@ -1,5 +1,5 @@
 const Joi = require('joi');
-const { HttpCode } = require('../../../helpers/constants');
+const { HttpCode, Subscription} = require('../../../helpers/constants');
 
 const validateUser = (req, _res, next) => {
   const { body } = req;
@@ -26,4 +26,26 @@ const validateUser = (req, _res, next) => {
   next();
 };
 
-module.exports = { validateUser };
+const updateUser = (req, _res, next) => {
+  const { body } = req;
+  const schema = Joi.object({
+    subscription: Joi.string().valid(...Object.values(Subscription)),
+  });
+  const validationResult = schema.validate(body);
+
+  try {
+    if (validationResult.error) {
+      const error = new Error();
+      const [{ message }] = validationResult.error.details;
+      error.message = `Filed: ${message.replace(/"/g, '')}`;
+      error.code = HttpCode.BAD_REQUEST;
+      throw error;
+    }
+  } catch (error) {
+    next(error);
+  }
+
+  next();
+};
+
+module.exports = { validateUser, updateUser };

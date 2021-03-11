@@ -39,13 +39,12 @@ const login = async (req, res, next) => {
       return res.status(HttpCode.UNAUTHORIZED).json({
         status: 'error',
         code: HttpCode.UNAUTHORIZED,
-        data: 'Unauntorized',
+        data: 'Unauthorized',
         message: 'Email or password is wrong',
       });
     }
     const id = user._id;
     const payload = { id };
-    console.log(payload);
     const token = jwt.sign(payload, SECRET_KEY, { expiresIn: '2h' });
     await Users.updateToken(id, token);
 
@@ -74,12 +73,11 @@ const currentUser = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const user = await Users.findById(userId);
-    console.log(user);
     if (!user) {
       return res.status(HttpCode.UNAUTHORIZED).json({
         status: 'error',
         code: HttpCode.UNAUTHORIZED,
-        data: 'Unauntorized',
+        data: 'Unauthorized',
         message: 'Not authorized',
       });
     } else {
@@ -99,4 +97,33 @@ const currentUser = async (req, res, next) => {
   }
 };
 
-module.exports = { reg, login, logout, currentUser };
+const updateSubscribe = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { subscription } = req.body;
+    const user = await Users.updateSubscription(userId, subscription);
+    if (!user) {
+      return res.status(HttpCode.UNAUTHORIZED).json({
+        status: 'error',
+        code: HttpCode.UNAUTHORIZED,
+        data: 'Unauthorized',
+        message: 'Not authorized',
+      });
+    } else {
+      return res.status(HttpCode.OK).json({
+        status: 'success',
+        code: HttpCode.OK,
+        data: {
+          user: {
+            email: user.email,
+            subscription: user.subscription,
+          },
+        },
+      });
+    }
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { reg, login, logout, currentUser, updateSubscribe };

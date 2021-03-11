@@ -6,13 +6,15 @@ const {
   updateContact,
 } = require('../model/contacts');
 
+const { HttpCode } = require('../helpers/constants');
+
 const get = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const contacts = await listContacts(userId);
     return res.json({
       status: 'success',
-      code: 200,
+      code: HttpCode.OK,
       data: {
         contacts,
       },
@@ -29,15 +31,15 @@ const getById = async (req, res, next) => {
     if (contact) {
       return res.json({
         status: 'success',
-        code: 200,
+        code: HttpCode.OK,
         data: {
           contact,
         },
       });
     } else {
-      return res.status(404).json({
+      return res.status(HttpCode.NOT_FOUND).json({
         status: 'error',
-        code: 404,
+        code: HttpCode.NOT_FOUND,
         message: 'Not found',
       });
     }
@@ -50,19 +52,18 @@ const create = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const contact = await addContact({ ...req.body, owner: userId });
-    console.log('New contact', contact);
     if (contact) {
-      return res.status(201).json({
+      return res.status(HttpCode.CREATED).json({
         status: 'success',
-        code: 201,
+        code: HttpCode.CREATED,
         data: {
           contact,
         },
       });
     } else {
-      return res.status(400).json({
+      return res.status(HttpCode.BAD_REQUEST).json({
         status: 'error',
-        code: 400,
+        code: HttpCode.BAD_REQUEST,
         message: 'Not created',
       });
     }
@@ -83,9 +84,9 @@ const remove = async (req, res, next) => {
         message: 'contact deleted',
       });
     } else {
-      return res.status(404).json({
+      return res.status(HttpCode.NOT_FOUND).json({
         status: 'error',
-        code: 404,
+        code: HttpCode.NOT_FOUND,
         message: 'Not Found',
       });
     }
@@ -98,9 +99,9 @@ const update = async (req, res, next) => {
   try {
     const userId = req.user.id;
     if (Object.keys(req.body).length < 1) {
-      return res.status(400).json({
+      return res.status(HttpCode.BAD_REQUEST).json({
         status: 'error',
-        code: 400,
+        code: HttpCode.BAD_REQUEST,
         message: 'missing fields',
       });
     }
@@ -108,15 +109,15 @@ const update = async (req, res, next) => {
     if (contact) {
       return res.json({
         status: 'success',
-        code: 200,
+        code: HttpCode.OK,
         data: {
           contact,
         },
       });
     } else {
-      return res.status(404).json({
+      return res.status(HttpCode.NOT_FOUND).json({
         status: 'error',
-        code: 404,
+        code: HttpCode.NOT_FOUND,
         message: 'Not Found',
       });
     }

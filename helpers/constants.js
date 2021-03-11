@@ -1,6 +1,6 @@
 const Subscription = {
   FREE: 'free',
-  PRO: 'product',
+  PRO: 'pro',
   PREM: 'premium',
 };
 
