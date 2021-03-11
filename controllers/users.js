@@ -13,7 +13,7 @@ const reg = async (req, res, next) => {
         status: 'error',
         code: HttpCode.CONFLICT,
         data: 'Conflict',
-        message: 'Email is already use',
+        message: 'Email in use',
       });
     }
     const newUser = await Users.create(req.body);
@@ -35,16 +35,17 @@ const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const user = await Users.findByEmail(email);
-    if (!user || !user.validPassword(password)) {
+    if (!user || !(await user.validPassword(password))) {
       return res.status(HttpCode.UNAUTHORIZED).json({
         status: 'error',
         code: HttpCode.UNAUTHORIZED,
         data: 'Unauntorized',
-        message: 'EInvalid credential',
+        message: 'Email or password is wrong',
       });
     }
     const id = user._id;
     const payload = { id };
+    console.log(payload);
     const token = jwt.sign(payload, SECRET_KEY, { expiresIn: '2h' });
     await Users.updateToken(id, token);
 
@@ -53,6 +54,10 @@ const login = async (req, res, next) => {
       code: HttpCode.OK,
       data: {
         token,
+        user: {
+          email: user.email,
+          subscription: user.subscription,
+        },
       },
     });
   } catch (e) {
@@ -65,4 +70,33 @@ const logout = async (req, res, next) => {
   return res.status(HttpCode.NO_CONTENT).json({ massege: 'Nothing' });
 };
 
-module.exports = { reg, login, logout };
+const currentUser = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const user = await Users.findById(userId);
+    console.log(user);
+    if (!user) {
+      return res.status(HttpCode.UNAUTHORIZED).json({
+        status: 'error',
+        code: HttpCode.UNAUTHORIZED,
+        data: 'Unauntorized',
+        message: 'Not authorized',
+      });
+    } else {
+      return res.status(HttpCode.OK).json({
+        status: 'success',
+        code: HttpCode.OK,
+        data: {
+          user: {
+            email: user.email,
+            subscription: user.subscription,
+          },
+        },
+      });
+    }
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { reg, login, logout, currentUser };

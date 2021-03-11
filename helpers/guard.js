@@ -1,4 +1,3 @@
-// const { required } = require('joi');
 const passport = require('passport');
 // const { reg } = require('../controllers/users');
 require('../config/passport');
@@ -10,12 +9,12 @@ const guard = (req, res, next) => {
     const [, token] = req.get('Authorization').split(' ');
     // console.log('User', user);
     // console.log('Err', err);
+    // console.log('Token', token);
     if (!user || err || token !== user.token) {
-      return res.status(HttpCode.FORBIDDEN).json({
+      return res.status(HttpCode.UNAUTHORIZED).json({
         status: 'error',
-        code: HttpCode.FORBIDDEN,
-        data: 'Forbidden',
-        message: 'Access is denied',
+        code: HttpCode.UNAUTHORIZED,
+        message: 'Not authorized',
       });
     }
     req.user = user;

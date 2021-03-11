@@ -1,6 +1,6 @@
 const { Schema, model } = require('mongoose');
 const bcrypt = require('bcryptjs');
-const { Sub } = require('../../helpers/constants');
+const { Subscription } = require('../../helpers/constants');
 const SALT_WORK_FACTOR = 8;
 
 const userSchema = new Schema(
@@ -20,8 +20,8 @@ const userSchema = new Schema(
     },
     subscription: {
       type: String,
-      enum: [Sub.FREE, Sub.PRO, Sub.PREM],
-      default: Sub.FREE,
+      enum: [Subscription.FREE, Subscription.PRO, Subscription.PREM],
+      default: Subscription.FREE,
     },
     token: {
       type: String,

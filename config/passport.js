@@ -4,8 +4,6 @@ const Users = require('../model/users');
 require('dotenv').config();
 const SECRET_KEY = process.env.JWT_SECRET;
 
-// console.log('Users', Users);
-
 const params = {
   secretOrKey: SECRET_KEY,
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -13,10 +11,8 @@ const params = {
 
 passport.use(
   new Strategy(params, async (payload, done) => {
-    // console.log('payload', payload);
     try {
       const user = await Users.findById(payload.id);
-      // console.log('findUser', user);
       if (!user) {
         return done(new Error('User not found'));
       }

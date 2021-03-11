@@ -38,7 +38,6 @@ const removeContact = async (contactId, userId) => {
 const addContact = async body => {
   try {
     const result = await Contact.create(body);
-    // console.log(result);
     return result;
   } catch (err) {
     console.log(err);
@@ -51,7 +50,10 @@ const updateContact = async (contactId, body, userId) => {
       { _id: contactId, owner: userId },
       { ...body },
       { new: true },
-    );
+    ).populate({
+      path: 'owner',
+      select: 'email subscription -_id',
+    });
     return result;
   } catch (err) {
     console.log(err);
