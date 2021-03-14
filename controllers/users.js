@@ -66,32 +66,23 @@ const login = async (req, res, next) => {
 const logout = async (req, res, next) => {
   const userId = req.user.id;
   await Users.updateToken(userId, null);
-  return res.status(HttpCode.NO_CONTENT).json({ massege: 'Nothing' });
+  return res.status(HttpCode.NO_CONTENT).json({ message: 'Nothing' });
 };
 
 const currentUser = async (req, res, next) => {
   try {
-    const userId = req.user.id;
-    const user = await Users.findById(userId);
-    if (!user) {
-      return res.status(HttpCode.UNAUTHORIZED).json({
-        status: 'error',
-        code: HttpCode.UNAUTHORIZED,
-        data: 'Unauthorized',
-        message: 'Not authorized',
-      });
-    } else {
-      return res.status(HttpCode.OK).json({
-        status: 'success',
-        code: HttpCode.OK,
-        data: {
-          user: {
-            email: user.email,
-            subscription: user.subscription,
+    const user = req.user;
+    console.log(user);
+    return res.status(HttpCode.OK).json({
+          status: 'success',
+          code: HttpCode.OK,
+          data: {
+            user: {
+              email: user.email,
+              subscription: user.subscription,
+            },
           },
-        },
-      });
-    }
+        });
   } catch (err) {
     next(err);
   }
@@ -101,26 +92,17 @@ const updateSubscribe = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const { subscription } = req.body;
-    const user = await Users.updateSubscription(userId, subscription);
-    if (!user) {
-      return res.status(HttpCode.UNAUTHORIZED).json({
-        status: 'error',
-        code: HttpCode.UNAUTHORIZED,
-        data: 'Unauthorized',
-        message: 'Not authorized',
-      });
-    } else {
+    const updateUser = await Users.updateSubscription(userId, subscription);
       return res.status(HttpCode.OK).json({
         status: 'success',
         code: HttpCode.OK,
         data: {
           user: {
-            email: user.email,
-            subscription: user.subscription,
+            email: updateUser.email,
+            subscription: updateUser.subscription,    
           },
         },
       });
-    }
   } catch (err) {
     next(err);
   }
