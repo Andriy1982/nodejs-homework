@@ -17,6 +17,7 @@ const reg = async (req, res, next) => {
       });
     }
     const newUser = await Users.create(req.body);
+
     return res.status(HttpCode.CREATED).json({
       status: 'success',
       code: HttpCode.CREATED,
@@ -24,6 +25,7 @@ const reg = async (req, res, next) => {
         id: newUser.id,
         email: newUser.email,
         subscription: newUser.subscription,
+        avatar: newUser.avatarURL,
       },
     });
   } catch (e) {
