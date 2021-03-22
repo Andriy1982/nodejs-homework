@@ -1,5 +1,5 @@
 const Joi = require('joi');
-const { HttpCode, Subscription} = require('../../../helpers/constants');
+const { HttpCode, Subscription } = require('../../../helpers/constants');
 
 const validateUser = (req, _res, next) => {
   const { body } = req;
@@ -48,4 +48,17 @@ const updateUser = (req, _res, next) => {
   next();
 };
 
-module.exports = { validateUser, updateUser };
+const updateAvatar = (req, res, next) => {
+  if (!req.file) {
+    return res.status(HttpCode.BAD_REQUEST).json({
+      status: 'error',
+      code: HttpCode.BAD_REQUEST,
+      data: 'bad request',
+      message: 'Filed of avatar not found',
+    });
+  }
+
+  next();
+};
+
+module.exports = { validateUser, updateUser, updateAvatar };
