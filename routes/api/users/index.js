@@ -15,8 +15,16 @@ router.post('/logout', guard, usersController.logout);
 
 router.get('/current', guard, usersController.currentUser);
 
-router.patch('/', guard, updateUser, usersController.updateSubscribe)
+router.patch('/', guard, updateUser, usersController.updateSubscribe);
 
-router.patch('/avatars', guard, upload.single('avatar'), updateAvatar, usersController.avatars)
+router.patch(
+  '/avatars',
+  guard,
+  upload.single('avatar'),
+  updateAvatar,
+  usersController.avatars,
+);
+
+router.get('/verify/:verificationToken', usersController.verify);
 
 module.exports = router;
