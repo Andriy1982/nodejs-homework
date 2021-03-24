@@ -2,8 +2,10 @@ const jwt = require('jsonwebtoken');
 const fs = require('fs').promises;
 const path = require('path');
 const Jimp = require('jimp');
+const { nanoid } = require('nanoid');
 require('dotenv').config();
 const { HttpCode } = require('../helpers/constants');
+const EmailService = require('../services/email');
 const createFolderIsExist = require('../helpers/create-dir');
 const SECRET_KEY = process.env.JWT_SECRET;
 const Users = require('../model/users');
@@ -20,8 +22,15 @@ const reg = async (req, res, next) => {
         message: 'Email in use',
       });
     }
-    const newUser = await Users.create(req.body);
+    const verifyToken = nanoid();
+    const emailService = new EmailService(process.env.NODE_ENV);
+    await emailService.sendEmail(verifyToken, email);
 
+    const newUser = await Users.create({
+      ...req.body,
+      verify: false,
+      verifyToken,
+    });
     return res.status(HttpCode.CREATED).json({
       status: 'success',
       code: HttpCode.CREATED,
@@ -41,7 +50,7 @@ const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const user = await Users.findByEmail(email);
-    if (!user || !(await user.validPassword(password))) {
+    if (!user || !(await user.validPassword(password)) || !user.verify) {
       return res.status(HttpCode.UNAUTHORIZED).json({
         status: 'error',
         code: HttpCode.UNAUTHORIZED,
@@ -157,4 +166,37 @@ const avatars = async (req, res, next) => {
   }
 };
 
-module.exports = { reg, login, logout, currentUser, updateSubscribe, avatars };
+const verify = async (req, res, next) => {
+  try {
+    const user = await Users.findByVerifyToken(req.params.verificationToken);
+    if (user) {
+      await Users.updateVerifyToken(user.id, true, null);
+      return res.status(HttpCode.OK).json({
+        status: 'success',
+        code: HttpCode.OK,
+        message: 'Verification successful',
+      });
+    }
+    return res.status(HttpCode.BAD_REQUEST).json({
+      status: 'error',
+      code: HttpCode.BAD_REQUEST,
+      data: 'Bad request',
+      message: 'User not found',
+    });
+  } catch (e) {
+    next(e);
+  }
+
+  const userId = req.user.id;
+  await Users.updateToken(userId, null);
+};
+
+module.exports = {
+  reg,
+  login,
+  logout,
+  currentUser,
+  updateSubscribe,
+  avatars,
+  verify,
+};

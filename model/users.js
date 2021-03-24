@@ -8,8 +8,18 @@ const findById = async id => {
   return User.findOne({ _id: id });
 };
 
-const create = async ({ email, password, subscription }) => {
-  const user = new User({ email, password, subscription });
+const findByVerifyToken = async verifyToken => {
+  return User.findOne({ verifyToken });
+};
+
+const create = async ({
+  email,
+  password,
+  subscription,
+  verify,
+  verifyToken,
+}) => {
+  const user = new User({ email, password, subscription, verify, verifyToken });
   return await user.save();
 };
 
@@ -17,8 +27,12 @@ const updateToken = async (id, token) => {
   return await User.updateOne({ _id: id }, { token });
 };
 
+const updateVerifyToken = async (id, verify, verifyToken) => {
+  return await User.findOneAndUpdate({ _id: id }, { verify, verifyToken });
+};
+
 const updateAvatar = async (id, avatar) => {
-  return await User.updateOne({ _id: id }, {avatarURL: avatar });
+  return await User.updateOne({ _id: id }, { avatarURL: avatar });
 };
 
 const updateSubscription = async (id, subscription) => {
@@ -33,4 +47,6 @@ module.exports = {
   updateToken,
   updateSubscription,
   updateAvatar,
+  findByVerifyToken,
+  updateVerifyToken,
 };
